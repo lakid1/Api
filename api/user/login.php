@@ -18,21 +18,27 @@ $user = new User($db);
 $data = json_decode(file_get_contents("php://input"));
 
 $user->email = $data->email;
-$user->heslo = md5($data->heslo);
+$user->password = $data->password;
+//$user->password = md5($data->password);
 $user->token = $data->token;
 //User login check
 if ($user->login()) {
 
-    if ($user->token != "") { //empty ?
-       if($user->tokenExpire($user->token)){
+    // Empty token ?
+    if (!empty($user->token)) {
+        if ($user->tokenExpire($user->token)) {
             echo json_encode(array('message' => 'OK'));
-       }else{
-            //create
-       }
+        } else {
+            //create token
+            $user->createToken();
+            echo json_encode(array('message' => 'OK', 'token' => $user->token));
+        }
     } else {
-            //create
+        //create token
+        $user->createToken();
+        echo json_encode(array('message' => 'OK', 'token' => $user->token));
     }
 
 } else {
-    echo json_encode(array('message' => 'Špatné jméno nebo heslo'));
+    echo json_encode(array('message' => 'Špatné jméno nebo password'));
 }

@@ -9,7 +9,7 @@ class User
     //User
     public $provozovatel_id;
     public $email;
-    public $heslo;
+    public $password;
     public $token;
     //Con DB
     public function __construct($db)
@@ -20,12 +20,12 @@ class User
     //Login
     public function login()
     {
-        $query = 'SELECT provozovatel_id,email FROM ' . $this->table . ' WHERE email LIKE ? AND heslo LIKE ?';
+        $query = 'SELECT provozovatel_id,email FROM ' . $this->table . ' WHERE email LIKE ? AND password LIKE ?';
 
         $stmt = $this->conn->prepare($query);
 
         $stmt->bindParam(1, $this->email);
-        $stmt->bindParam(1, $this->heslo);
+        $stmt->bindParam(2, $this->password);
 
         $stmt->execute();
 
@@ -43,19 +43,21 @@ class User
 
     public function tokenExpire($token)
     {
-        $query = 'SELECT * FROM tokens WHERE value LIKE ? AND date_ex >= NOW()';
+        $query = 'SELECT * FROM tokens WHERE value LIKE ? AND date_ex >= NOW() AND provozovatel_id = ?';
 
-        $stmt = $conn->prepare($query);
+        $stmt = $this->conn->prepare($query);
         $stmt->bindParam(1, $token);
+        $stmt->bindParam(2, $this->provozovatel_id);
 
         $stmt->execute();
 
         if ($stmt->fetchColumn() > 0) {
             return true;
         } else {
-            $query = "DELETE FROM tokens WHERE value LIKE ?";
-            $stmt = $conn->prepare();
+            $query = "DELETE FROM tokens WHERE value LIKE ? AND provozovatel_id = ?";
+            $stmt = $this->conn->prepare($query);
             $stmt->bindParam(1, $token);
+            $stmt->bindParam(2, $this->provozovatel_id);
             $stmt->execute();
             return false;
         }
@@ -63,9 +65,24 @@ class User
     }
 
     public function createToken()
-    {   
-
-        $this->token = hash('sha256',random_bytes(100));
+    {
+        //Create token
+        $hash = hash('sha256', random_bytes(64));
         //Check
+        $query = "SELECT * FROM tokens WHERE value LIKE ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(1, $hash);
+        $stmt->execute();
+
+        if ($stmt->fetchColumn() > 0) {
+            $this->createToken();
+        } else {
+            //Set token
+            $this->token = $hash;
+
+            //Insert token to DB
+
+        }
+
     }
 }
