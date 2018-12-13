@@ -2,8 +2,8 @@
 header('Access-Controll-Allow-Origin: *');
 header('Content-Type: application/json');
 header('Acces-Control-Allow-Methods: POST');
-header('Acces-Control-Allow-Headers: Acces-Control-Allow-Headers,
-Content-Type, Acces-Control-Allow-Methods, Authorization, X-Requested-With');
+// header('Acces-Control-Allow-Headers: Acces-Control-Allow-Headers,
+// Content-Type, Acces-Control-Allow-Methods, Authorization, X-Requested-With');
 
 include_once '../../config/Database.php';
 include_once '../../models/User.php';
@@ -20,25 +20,22 @@ $data = json_decode(file_get_contents("php://input"));
 $user->email = $data->email;
 $user->password = $data->password;
 //$user->password = md5($data->password);
-$user->token = $data->token;
+//$user->token = $data->token;
 //User login check
 if ($user->login()) {
 
-    // Empty token ?
-    if (!empty($user->token)) {
-        if ($user->tokenExpire($user->token)) {
-            echo json_encode(array('message' => 'OK'));
-        } else {
-            //create token
-            $user->createToken();
-            echo json_encode(array('message' => 'OK', 'token' => $user->token));
-        }
+    // Check token
+    if ($user->checkToken()) {
+        //echo json_encode(array('message' => 'OK'));
+        http_response_code(200);
     } else {
-        //create token
+        // Create token
         $user->createToken();
-        echo json_encode(array('message' => 'OK', 'token' => $user->token));
+        echo json_encode(array('token' => $user->token));
+        http_response_code(200);
     }
 
 } else {
     echo json_encode(array('message' => 'Špatné jméno nebo password'));
+    http_response_code(403);
 }

@@ -41,24 +41,25 @@ class User
 
     }
 
-    public function tokenExpire($token)
+    public function checkToken()
     {
-        $query = 'SELECT * FROM tokens WHERE value LIKE ? AND date_ex >= NOW() AND provozovatel_id = ?';
+        $query = 'SELECT * FROM tokens
+        WHERE value LIKE
+        (SELECT value FROM tokens WHERE provozovatel_id = ?)
+        AND date_ex >= NOW()';
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $token);
-        $stmt->bindParam(2, $this->provozovatel_id);
-
+        $stmt->bindParam(1, $this->provozovatel_id);
         $stmt->execute();
 
         if ($stmt->fetchColumn() > 0) {
             return true;
         } else {
-            $query = "DELETE FROM tokens WHERE value LIKE ? AND provozovatel_id = ?";
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(1, $token);
-            $stmt->bindParam(2, $this->provozovatel_id);
-            $stmt->execute();
+            // $query = "DELETE FROM tokens WHERE value LIKE ? AND provozovatel_id = ?";
+            // $stmt = $this->conn->prepare($query);
+            // $stmt->bindParam(1, $token);
+            // $stmt->bindParam(2, $this->provozovatel_id);
+            // $stmt->execute();
             return false;
         }
 
