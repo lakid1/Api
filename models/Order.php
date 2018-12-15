@@ -2,7 +2,7 @@
 class Order
 {
     //DB
-    private  $conn;
+    private $conn;
     private $table;
 
     //Order

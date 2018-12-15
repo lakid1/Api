@@ -24,18 +24,13 @@ $user->password = $data->password;
 //User login check
 if ($user->login()) {
 
-    // Check token
-    if ($user->checkToken()) {
-        //echo json_encode(array('message' => 'OK'));
+        // Check token
+        $user->checkToken();
+        echo json_encode(array('token' => $user->token, 'date' => $user->date));
         http_response_code(200);
-    } else {
-        // Create token
-        $user->createToken();
-        echo json_encode(array('token' => $user->token));
-        http_response_code(200);
-    }
+    
 
 } else {
-    echo json_encode(array('message' => 'Špatné jméno nebo password'));
+    //echo json_encode(array('message' => 'Špatné jméno nebo password'));
     http_response_code(403);
 }

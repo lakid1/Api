@@ -11,6 +11,7 @@ class User
     public $email;
     public $password;
     public $token;
+    public $date;
     //Con DB
     public function __construct($db)
     {
@@ -30,6 +31,7 @@ class User
         $stmt->execute();
 
         if ($stmt->fetchColumn() > 0) {
+            $stmt->execute();
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
             $this->provozovatel_id = $row['provozovatel_id'];
@@ -43,7 +45,7 @@ class User
 
     public function checkToken()
     {
-        $query = 'SELECT * FROM tokens
+        $query = 'SELECT value, date_ex  FROM tokens
         WHERE value LIKE
         (SELECT value FROM tokens WHERE provozovatel_id = ?)
         AND date_ex >= NOW()';
@@ -53,14 +55,13 @@ class User
         $stmt->execute();
 
         if ($stmt->fetchColumn() > 0) {
-            return true;
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            $this->token = $row['value'];
+            $this->date = $row['date_ex'];
         } else {
-            // $query = "DELETE FROM tokens WHERE value LIKE ? AND provozovatel_id = ?";
-            // $stmt = $this->conn->prepare($query);
-            // $stmt->bindParam(1, $token);
-            // $stmt->bindParam(2, $this->provozovatel_id);
-            // $stmt->execute();
-            return false;
+           $this->createToken();
         }
 
     }
@@ -81,9 +82,17 @@ class User
             //Set token
             $this->token = $hash;
 
+            //Set expiration date
+            $this->date = date('Y-m-d', strtotime('+1 month'));
+            
             //Insert token to DB
-
-        }
+            $query = "INSERT INTO tokens() VALUES(null,?,?,?)";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(1, $hash);
+            $stmt->bindParam(2, $this->date);
+            $stmt->bindParam(3, $this->provozovatel_id);
+            $stmt->execute();
+         }
 
     }
 }
