@@ -29,8 +29,8 @@ if ($order->checkToken()) {
             $rowArray = array(
                 'Id' => $row['id'],
                 'Datum' => $row['datum'],
-                'Stav' => $row['stav'],
-                'Nazev' => $row['auto'],
+                'Auto' => $row['auto'],
+                'Cena' => $row['cena'],
             );
 
             //Push

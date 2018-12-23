@@ -79,10 +79,11 @@ class Order
     public function readHistory()
     {
         //Select data
-        $query = "SELECT servisni_objednavka_id as 'id', datum as 'datum', stav as 'stav', CONCAT(znacka,' ',model) AS 'auto'
-         FROM servisni_objednavka s
-         INNER JOIN auto a USING(auto_id)
-         WHERE s.provozovatel_id = ? AND stav LIKE'dokončeno'";
+        $query = "SELECT so.servisni_objednavka_id AS 'id', so.datum AS 'datum', CONCAT(a.znacka,' ',a.model) AS 'auto', SUM(sr.cena) AS 'cena' 
+        FROM auto a INNER JOIN servisni_objednavka so USING(auto_id) 
+        RIGHT JOIN servisni_objednavka_radky sr USING(servisni_objednavka_id) 
+        WHERE so.provozovatel_id = ? AND stav LIKE 'dokončeno' 
+        GROUP BY so.servisni_objednavka_id ";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(1, $this->provozovatel_id);
         $stmt->execute();
