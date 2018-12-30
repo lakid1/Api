@@ -15,7 +15,7 @@ $order = new Order($db);
 //Get data from app
 $data = json_decode(file_get_contents("php://input"));
 
-$order->token = $data->token;
+$order->token = $data->Token;
 
 if ($order->checkToken()) {
 

@@ -17,8 +17,8 @@ $user = new User($db);
 //Get data from app
 $data = json_decode(file_get_contents("php://input"));
 
-$user->email = $data->email;
-$user->password = $data->password;
+$user->email = $data->Email;
+$user->password = $data->Password;
 //$user->password = md5($data->password);
 //$user->token = $data->token;
 //User login check
@@ -26,7 +26,7 @@ if ($user->login()) {
 
         // Check token
         $user->checkToken();
-        echo json_encode(array('token' => $user->token, 'date' => $user->date));
+        echo json_encode(array('Token' => $user->token, 'Date' => $user->date));
         http_response_code(200);
     
 

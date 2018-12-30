@@ -15,7 +15,7 @@ $order = new Order($db);
 //Get data from app
 $data = json_decode(file_get_contents("php://input"));
 
-$order->token = $data->token;
+$order->token = $data->Token;
 
 if ($order->checkToken()) {
 
@@ -27,9 +27,10 @@ if ($order->checkToken()) {
         while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 
             $rowArray = array(
-                'datum' => $row['datum'],
-                'stav' => $row['stav'],
-                'auto' => $row['auto'],
+                'ID' => $row['id'],
+                'Datum' => $row['datum'],
+                'Stav' => $row['stav'],
+                'Auto' => $row['auto'],
             );
 
             //Push

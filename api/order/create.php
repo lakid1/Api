@@ -16,14 +16,14 @@ $order = new Order($db);
 $data = json_decode(file_get_contents("php://input"));
 
 //Set token
-$order->token = $data->token;
-$order->auto_id = $data->auto_id;
-$order->datum_objednavky = $data->datum_objednavky;
+$order->token = $data->Token;
+$order->auto_id = $data->Id;
+$order->datum_objednavky = $data->Date;
 
 if($order->checkToken()){
     if($order->createOrder()){
         http_response_code(200);
-        echo(json_encode(array('provozovatel_id' => $order->provozovatel_id)));
+        //echo(json_encode(array('provozovatel_id' => $order->provozovatel_id)));
     }else{
         http_response_code(404);
     }

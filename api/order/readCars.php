@@ -18,20 +18,18 @@ $data = json_decode(file_get_contents("php://input"));
 $order->token = $data->Token;
 
 if ($order->checkToken()) {
-
-    //id
-    $order->servisni_objednavka_id = $data->Id;
-
-    $result = $order->readDetail();
+    
+    $result = $order->readCars();
     $resultArray = array();
 
     while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 
         $rowArray = array(
-            'Datum' => $row['datum'],
-            'Cena' => $row['cena'],
-            'Popis' => $row['popis'],
-            'Zasah' => $row['nazev'],
+            'Id' => $row['auto_id'],
+            'Spz' => $row['spz'],
+            'Znacka' => $row['znacka'],
+            'Model' => $row['model'],
+            'Rok' => $row['rok_vyroby'],
         );
 
         //Push
