@@ -60,10 +60,44 @@ class User
 
             $this->token = $row['value'];
             $this->date = $row['date_ex'];
+
         } else {
-           $this->createToken();
+            $this->createToken();
         }
 
+    }
+
+    public function checkToken2()
+    {
+        $query = 'SELECT * FROM tokens WHERE value LIKE ? AND date_ex >= NOW()';
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(1, $this->token);
+        $stmt->execute();
+        if ($stmt->fetchColumn() > 0) {
+
+            //Set provozovatel_id
+            $query = "SELECT provozovatel_id FROM tokens WHERE value LIKE ?";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(1, $this->token);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $this->provozovatel_id = $row['provozovatel_id'];
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function userInfo()
+    {
+        $query = "SELECT CONCAT(jmeno,' ',prijmeni) AS uzivatel, email, telefon,
+        CONCAT(ulice,' ',cislo_popisne,' ',mesto,' ',psc) AS adresa
+        FROM provozovatel INNER JOIN adresa USING(adresa_id)
+        WHERE provozovatel_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(1, $this->provozovatel_id);
+        $stmt->execute();
+        return $stmt;
     }
 
     public function createToken()
@@ -84,7 +118,7 @@ class User
 
             //Set expiration date
             $this->date = date('Y-m-d', strtotime('+1 month'));
-            
+
             //Insert token to DB
             $query = "INSERT INTO tokens() VALUES(null,?,?,?)";
             $stmt = $this->conn->prepare($query);
@@ -92,7 +126,7 @@ class User
             $stmt->bindParam(2, $this->date);
             $stmt->bindParam(3, $this->provozovatel_id);
             $stmt->execute();
-         }
+        }
 
     }
 }
