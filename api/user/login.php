@@ -18,14 +18,14 @@ $user = new User($db);
 $data = json_decode(file_get_contents("php://input"));
 
 $user->email = $data->Email;
-$user->password = $data->Password;
-//$user->password = md5($data->password);
-//$user->token = $data->token;
+$user->password = md5($data->Password);
+
 //User login check
 if ($user->login()) {
 
         // Check token
         $user->checkToken();
+        
         echo json_encode(array('Token' => $user->token, 'Date' => $user->date));
         http_response_code(200);
     

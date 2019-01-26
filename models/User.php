@@ -10,6 +10,7 @@ class User
     public $provozovatel_id;
     public $email;
     public $password;
+    public $newPassword;
     public $token;
     public $date;
     //Con DB
@@ -42,13 +43,41 @@ class User
         }
 
     }
+    public function changePassword()
+    {
+        $query = "SELECT jmeno
+        FROM provozovatel
+        WHERE provozovatel_id = ? AND password LIKE ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(1, $this->provozovatel_id);
+        $passwd = md5($this->password);
+        $stmt->bindParam(2, $passwd);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+
+            $query = "UPDATE provozovatel
+             SET password = ?
+             WHERE provozovatel_id = ?";
+            $stmt = $this->conn->prepare($query);
+            $passwd = md5($this->newPassword);
+            $stmt->bindParam(1, $passwd);
+            $stmt->bindParam(2, $this->provozovatel_id);
+            $stmt->execute();
+
+            return true;
+        } else {
+            return false;
+        }
+
+    }
 
     public function checkToken()
     {
         $query = 'SELECT value, date_ex  FROM tokens
-        WHERE value LIKE
-        (SELECT value FROM tokens WHERE provozovatel_id = ?)
-        AND date_ex >= NOW()';
+        WHERE provozovatel_id = ? AND date_ex > NOW();';
+        //(SELECT value FROM tokens WHERE provozovatel_id = ?)
+        // AND date_ex >= NOW()';
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(1, $this->provozovatel_id);
