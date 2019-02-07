@@ -19,6 +19,7 @@ $data = json_decode(file_get_contents("php://input"));
 $order->token = $data->Token;
 $order->auto_id = $data->Id;
 $order->datum_objednavky = $data->Date;
+$order->zavada = $data->Zavada;
 
 if($order->checkToken()){
     if($order->createOrder()){

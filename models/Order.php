@@ -12,6 +12,7 @@ class Order
     public $stav;
     public $provozovatel_id;
     public $auto_id;
+    public $zavada;
 
     //Detail
     public $datum_zasahu;
@@ -46,20 +47,31 @@ class Order
             return false;
         }
     }
-    
+
     public function createOrder()
     {
 
-        //Create order
-        $query = "INSERT INTO servisni_objednavka() VALUES(null,?,'přijato',null,?,?)";
-        $stmt = $this->conn->prepare($query);
+        //Limit
+        $check = "SELECT servisni_objednavka_id FROM servisni_objednavka WHERE datum LIKE ? AND stav NOT LIKE 'storno'";
+        $stmt = $this->conn->prepare($check);
         $stmt->bindParam(1, $this->datum_objednavky);
-        $stmt->bindParam(2, $this->provozovatel_id);
-        $stmt->bindParam(3, $this->auto_id);
-        if ($stmt->execute() === true) {
-            return true;
-        } else {
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 5) {
             return false;
+        } else {
+            //Create order
+            $query = "INSERT INTO servisni_objednavka() VALUES(null,?,'přijato',null,?,?,?)";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(1, $this->datum_objednavky);
+            $stmt->bindParam(2,$this->zavada);
+            $stmt->bindParam(3, $this->provozovatel_id);
+            $stmt->bindParam(4, $this->auto_id);
+            if ($stmt->execute() === true) {
+                return true;
+            } else {
+                return false;
+            }
         }
 
     }
@@ -68,7 +80,7 @@ class Order
         //Select data
         $query = "SELECT servisni_objednavka_id as 'id', datum as 'datum', stav as 'stav', ukonceno,CONCAT(znacka,' ',model) AS 'auto'
         FROM servisni_objednavka s INNER JOIN auto a USING(auto_id)
-        WHERE s.provozovatel_id = ? AND (s.ukonceno < ADDDATE(CURDATE(),INTERVAL 1 WEEK) OR s.ukonceno IS null)
+        WHERE s.provozovatel_id = ? AND (CURDATE() < ADDDATE(s.ukonceno,INTERVAL 1 WEEK) OR s.ukonceno IS null)
         ORDER BY datum ASC";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(1, $this->provozovatel_id);
